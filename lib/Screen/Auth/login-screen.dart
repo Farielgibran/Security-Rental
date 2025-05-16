@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:security_rental/Config/app_config.dart';
+import 'package:security_rental/Screen/Auth/face-verification.dart';
 import 'package:security_rental/Screen/Home/Navbar/navbar.dart';
 import 'package:security_rental/Screen/Home/homepage.dart';
+import 'package:security_rental/Screen/Widget/Component/custom_button.dart';
+import 'package:security_rental/Screen/Widget/Component/custom_textfield.dart';
+import 'package:security_rental/Service/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,23 +31,40 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    // Navigator.of(context).pushReplacement(
+    //   MaterialPageRoute(builder: (_) => HomeScreen()),
+    // );
+    // return;
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    final authService = Provider.of<AuthService>(context, listen: false);
 
-    try {
-      await Future.delayed(Duration(seconds: 2));
-      if (mounted) {
+    final success = await authService.login(
+      username: _usernameController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    if (success && mounted) {
+      // Cek apakah verifikasi wajah diperlukan
+      if (AppConfig.faceVerificationRequired &&
+          authService.currentUser!.faceId != null) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => MainNavbar()),
+          MaterialPageRoute(builder: (_) => FaceVerificationScreen()),
+        );
+      } else {
+        // Jika tidak perlu verifikasi wajah, langsung ke HomeScreen
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => MainNavbar()),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login gagal. Periksa email dan password Anda.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -53,156 +75,85 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            padding: EdgeInsets.all(24.w),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 64.h),
-
-                  // Logo
                   Center(
-                    child: Container(
-                      height: 96.h,
-                      width: 96.h,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.security,
-                        size: 48.sp,
-                        color: Theme.of(context).primaryColor,
-                      ),
+                    child: Icon(
+                      Icons.directions_car,
+                      size: 80.sp,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
-                  SizedBox(height: 36.h),
-
-                  // Title
+                  SizedBox(height: 24.h),
                   Center(
-                    child: Text(
-                      'Security Rental App',
-                      style: theme.displayLarge,
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Text('Selamat Datang Kembali',
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayLarge
+                            ?.copyWith(color: Colors.grey)),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 8.h),
                   Center(
                     child: Text(
-                      'Log in to your account',
-                      style: theme.headlineMedium?.copyWith(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w400,
+                      'Login untuk melanjutkan',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        color: Colors.grey[600],
                       ),
                     ),
                   ),
                   SizedBox(height: 48.h),
-
-                  // Username
                   Text(
-                    'Username',
-                    style: theme.labelLarge,
-                  ),
-                  SizedBox(height: 12.h),
-                  TextFormField(
-                    controller: _usernameController,
-                    style: theme.labelMedium?.copyWith(color: Colors.black),
-                    decoration: InputDecoration(
-                      hintText: 'Enter your username',
-                      hintStyle: theme.labelMedium?.copyWith(
-                        color: Colors.grey,
-                      ),
-                      prefixIcon: Icon(Icons.person),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
+                    'Email',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
                     ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Username tidak boleh kosong';
-                      }
-                      return null;
-                    },
+                  ),
+                  SizedBox(height: 8.h),
+                  CustomTextField(
+                    controller: _usernameController,
+                    hintText: 'Masukkan Username Anda',
+                    keyboardType: TextInputType.emailAddress,
+                    prefixIcon: Icons.email_outlined,
                   ),
                   SizedBox(height: 24.h),
-
-                  // Password
                   Text(
                     'Password',
-                    style: theme.labelLarge,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  SizedBox(height: 12.h),
-                  TextFormField(
+                  SizedBox(height: 8.h),
+                  CustomTextField(
                     controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    style: theme.labelMedium?.copyWith(color: Colors.black),
-                    decoration: InputDecoration(
-                      hintText: 'Enter your password',
-                      hintStyle: theme.labelMedium?.copyWith(
+                    hintText: 'Masukkan password Anda',
+                    obscureText: !_obscurePassword,
+                    prefixIcon: Icons.lock_outline,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         color: Colors.grey,
                       ),
-                      prefixIcon: Icon(Icons.lock),
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Password tidak boleh kosong';
-                      } else if (value.length < 6) {
-                        return 'Password minimal 6 karakter';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 36.h),
-
-                  // Login Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48.h,
-                    child: _isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16.r),
-                              ),
-                              backgroundColor: Theme.of(context).primaryColor,
-                            ),
-                            onPressed: _login,
-                            child: Text(
-                              'Login',
-                              style: theme.headlineLarge?.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                  ),
-                  SizedBox(height: 24.h),
-
-                  // Footer Text
-                  Center(
-                    child: Text(
-                      'Security check for rental',
-                      style: theme.headlineMedium?.copyWith(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w400,
-                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                   ),
+                  SizedBox(height: 16.h),
                   SizedBox(height: 32.h),
+                  CustomButton(text: 'Login', onPressed: _login),
+                  SizedBox(height: 24.h),
                 ],
               ),
             ),

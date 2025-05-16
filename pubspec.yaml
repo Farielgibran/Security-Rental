@@ -14,7 +14,10 @@ dependencies:
   flutter_screenutil: ^5.9.3
   google_fonts: ^6.2.1
   huawei_ml_body: ^3.12.0+301
-
+  intl: ^0.20.2
+  shared_preferences: ^2.5.3
+  camera: ^0.10.5+2
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

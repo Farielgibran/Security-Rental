@@ -8,9 +8,12 @@ ThemeData Darkmode = ThemeData(
     scaffoldBackgroundColor: Color(0xff121212),
     colorScheme: ColorScheme.dark(
         primary: Color(0xff03A9F5),
-        // warna teks
+        // warna container nyatu dengan bg
         onPrimary: Colors.black,
+        //sebaliknya
         onSecondary: Colors.white),
+    //teks yang diatas container
+
     textTheme: GoogleFonts.nunitoTextTheme(TextTheme(
         bodyLarge: TextStyle(
             fontSize: 48.sp, fontWeight: FontWeight.bold, color: Colors.white),
@@ -43,30 +46,30 @@ ThemeData Lightmode = ThemeData(
     scaffoldBackgroundColor: Colors.white,
     colorScheme: ColorScheme.light(
         primary: Color(0xff03A9F5),
-        //warna teks
-        onPrimary: Colors.black,
-        onSecondary: Colors.white),
+        // warna container nyatu dengan bg
+        onPrimary: Colors.white,
+        onSecondary: Colors.black),
     textTheme: GoogleFonts.nunitoTextTheme(TextTheme(
         bodyLarge: TextStyle(
-            fontSize: 48.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 48.sp, fontWeight: FontWeight.bold, color: Colors.black),
         bodyMedium: TextStyle(
-            fontSize: 36.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 36.sp, fontWeight: FontWeight.bold, color: Colors.black),
         bodySmall: TextStyle(
-            fontSize: 32.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 32.sp, fontWeight: FontWeight.bold, color: Colors.black),
         displayLarge: TextStyle(
-            fontSize: 24.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 24.sp, fontWeight: FontWeight.bold, color: Colors.black),
         displayMedium: TextStyle(
-            fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.black),
         headlineLarge: TextStyle(
-            fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black),
         headlineMedium: TextStyle(
-            fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black),
         headlineSmall: TextStyle(
-            fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.black),
         labelLarge: TextStyle(
-            fontSize: 16.sp, fontWeight: FontWeight.w500, color: Colors.white),
+            fontSize: 16.sp, fontWeight: FontWeight.w500, color: Colors.black),
         labelMedium: TextStyle(
-            fontSize: 14.sp, fontWeight: FontWeight.w500, color: Colors.white),
+            fontSize: 14.sp, fontWeight: FontWeight.w500, color: Colors.black),
         labelSmall: TextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
