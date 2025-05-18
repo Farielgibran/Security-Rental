@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:security_rental/Model/rental_model.dart';
 import 'package:security_rental/Screen/Widget/Common/custom_buttom.dart';
-
-import 'dart:io';
 import 'package:provider/provider.dart';
-import '../../../../service/rental_service.dart';
+import 'package:security_rental/Service/rental_service.dart';
 
 class RentalCard extends StatelessWidget {
   final Rental rental;
@@ -61,13 +59,13 @@ class RentalCard extends StatelessWidget {
   }
 
   // Batalkan rental
-  Future<void> _cancelRental(BuildContext context) async {
+  Future<void> verifikasikeluar(BuildContext context) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Batalkan Sewa'),
-          content: const Text('Apakah Anda yakin ingin membatalkan sewa ini?'),
+          title: const Text('confirmasi mobil keluar'),
+          content: const Text('Apakah Anda yakin ingin keluar verifikasi ini?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -84,22 +82,70 @@ class RentalCard extends StatelessWidget {
 
     if (confirm == true) {
       final rentalService = Provider.of<RentalService>(context, listen: false);
-      final success = await rentalService.cancelRental(
-        rental.id,
-        'your-token', // Dalam aplikasi nyata, gunakan token dari authService
+      final success = await rentalService.verifikasiMobilKeluar(
+        rental: rental.id.toString(),
+        token: 'your-token',
       );
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Sewa berhasil dibatalkan'),
+            content: Text('mobil terverifikasi keluar'),
             backgroundColor: Colors.green,
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Gagal membatalkan sewa'),
+            content: Text('Gagal verifikasi keluar'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Batalkan rental
+  Future<void> verifikasimasuk(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('confirmasi mobil masuk'),
+          content:
+              const Text('Apakah Anda yakin ingin masuk mobil verifikasi ini?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Tidak'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Ya'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      final rentalService = Provider.of<RentalService>(context, listen: false);
+      final success = await rentalService.verifikasiMobilmasuk(
+        rental: rental.id.toString(),
+        token: 'your-token',
+      );
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('mobil terverifikasi masuk kembali'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal verifikasi mobil masuk kembali'),
             backgroundColor: Colors.red,
           ),
         );
@@ -260,9 +306,28 @@ class RentalCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: CustomButton(
-                      text: 'Rejected',
-                      onPressed: () => _cancelRental(context),
+                      text: 'Verifikasi Mobil Keluar',
+                      onPressed: () => verifikasikeluar(context),
                       color: Colors.red,
+                      height: 36,
+                      icon: Icons.door_back_door,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          // Actions
+          if (rental.status == RentalStatus.onGoing)
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      text: 'Verifikasi Mobil kembali masuk',
+                      onPressed: () => verifikasimasuk(context),
+                      color: Colors.green,
                       height: 36,
                       icon: Icons.cancel,
                     ),

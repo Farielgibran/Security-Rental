@@ -4,8 +4,9 @@ import 'package:security_rental/Screen/Auth/face-verification.dart';
 import 'package:security_rental/Screen/Auth/login-screen.dart';
 import 'package:security_rental/Screen/Widget/Common/custom_buttom.dart';
 import 'package:security_rental/Screen/Widget/Common/loading_widget.dart';
-import '../../service/auth_service.dart';
+import 'package:security_rental/Service/auth_service.dart';
 import '../../config/app_config.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -19,27 +20,18 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.account_circle,
-              size: 64,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            const Text(
+            Icon(Icons.account_circle, size: 64.w, color: Colors.grey),
+            SizedBox(height: 16.h),
+            Text(
               'Anda belum login',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               'Silakan login untuk melihat profil Anda',
-              style: TextStyle(
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             CustomButton(
               text: 'Login',
               onPressed: () {
@@ -48,266 +40,168 @@ class ProfileScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => LoginScreen()),
                 );
               },
-              width: 200,
+              width: 200.w,
             ),
           ],
         ),
       );
     }
 
-    if (authService.isLoading) {
-      return Center(child: LoadingWidget());
-    }
+    if (authService.isLoading) return Center(child: LoadingWidget());
 
     final user = authService.currentUser!;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Profile Header
-          Center(
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey[200],
-                  backgroundImage: user.faceImagePath != null
-                      ? NetworkImage(user.faceImagePath!)
-                      : null,
-                  child: user.faceImagePath == null
-                      ? Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Colors.grey[400],
-                        )
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  user.username,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(16.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 50.r,
+                    backgroundColor: Colors.grey[200],
+                    backgroundImage: user.faceImagePath != null
+                        ? NetworkImage(user.faceImagePath!)
+                        : null,
+                    child: user.faceImagePath == null
+                        ? Icon(Icons.person,
+                            size: 50.r, color: Colors.grey[400])
+                        : null,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  user.lvlUsers,
-                  style: TextStyle(
-                    color: Colors.grey[600],
+                  SizedBox(height: 16.h),
+                  Text(
+                    user.username,
+                    style:
+                        TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 8),
-                user.faceId != null
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.green[50],
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.green),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.verified_user,
-                              size: 16,
-                              color: Colors.green,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Terverifikasi',
-                              style: TextStyle(
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => FaceVerificationScreen()),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
+                  SizedBox(height: 4.h),
+                  Text(
+                    user.lvlUsers,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
+                  ),
+                  SizedBox(height: 8.h),
+                  user.faceId != null
+                      ? Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.w, vertical: 4.h),
                           decoration: BoxDecoration(
-                            color: Colors.orange[50],
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.orange),
+                            color: Colors.green[50],
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(color: Colors.green),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                Icons.warning,
-                                size: 16,
-                                color: Colors.orange,
-                              ),
-                              SizedBox(width: 4),
+                              Icon(Icons.verified_user,
+                                  size: 16.w, color: Colors.green),
+                              SizedBox(width: 4.w),
                               Text(
-                                'Belum Diverifikasi',
+                                'Terverifikasi',
                                 style: TextStyle(
-                                  color: Colors.orange,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13.sp),
                               ),
                             ],
                           ),
+                        )
+                      : InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => FaceVerificationScreen()),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: Colors.orange[50],
+                              borderRadius: BorderRadius.circular(16.r),
+                              border: Border.all(color: Colors.orange),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.warning,
+                                    size: 16.w, color: Colors.orange),
+                                SizedBox(width: 4.w),
+                                Text(
+                                  'Belum Diverifikasi',
+                                  style: TextStyle(
+                                      color: Colors.orange,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13.sp),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-              ],
+                ],
+              ),
             ),
-          ),
-
-          const SizedBox(height: 32),
-
-          // Profile Info Sections
-          _buildSection(
-            context,
-            title: 'Informasi Pribadi',
-            items: [
-              // ProfileMenuItem(
-              //   icon: Icons.phone,
-              //   title: 'Nomor Telepon',
-              //   subtitle: user.phone,
-              // ),
-              // if (user.idCardNumber != null)
-              //   ProfileMenuItem(
-              //     icon: Icons.credit_card,
-              //     title: 'Nomor KTP',
-              //     subtitle: user.idCardNumber!,
-              //   ),
-              // if (user.drivingLicense != null)
-              //   ProfileMenuItem(
-              //     icon: Icons.drive_eta,
-              //     title: 'Nomor SIM',
-              //     subtitle: user.drivingLicense!,
-              //   ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          _buildSection(
-            context,
-            title: 'Pengaturan',
-            items: [
+            _buildSection(context, title: 'Lainnya', items: [
               ProfileMenuItem(
-                icon: Icons.edit,
-                title: 'Edit Profil',
-                onTap: () {
-                  // Navigate to edit profile
-                },
-              ),
-              ProfileMenuItem(
-                icon: Icons.lock,
-                title: 'Ubah Password',
-                onTap: () {
-                  // Navigate to change password
-                },
-              ),
-              ProfileMenuItem(
-                icon: Icons.notifications,
-                title: 'Notifikasi',
-                onTap: () {
-                  // Navigate to notifications settings
-                },
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          _buildSection(
-            context,
-            title: 'Lainnya',
-            items: [
-              ProfileMenuItem(
-                icon: Icons.help_outline,
-                title: 'Bantuan',
-                onTap: () {
-                  // Navigate to help
-                },
-              ),
+                  icon: Icons.help_outline, title: 'Bantuan', onTap: () {}),
               ProfileMenuItem(
                 icon: Icons.info_outline,
                 title: 'Tentang Aplikasi',
                 onTap: () {
-                  // Show about dialog
                   showDialog(
                     context: context,
-                    builder: (context) => AboutDialog(
+                    builder: (_) => AboutDialog(
                       applicationName: AppConfig.appName,
                       applicationVersion: AppConfig.appVersion,
-                      applicationIcon: Icon(
-                        Icons.directions_car,
-                        size: 40,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      children: const [
+                      applicationIcon: Icon(Icons.directions_car,
+                          size: 40.w, color: Theme.of(context).primaryColor),
+                      children: [
                         Text(
                           'Aplikasi peminjaman mobil dengan verifikasi wajah.',
-                          style: TextStyle(
-                            fontSize: 12,
-                          ),
+                          style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ],
                     ),
                   );
                 },
               ),
-            ],
-          ),
-
-          const SizedBox(height: 32),
-
-          // Logout Button
-          CustomButton(
-            text: 'Logout',
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text('Logout'),
-                    content: const Text('Apakah Anda yakin ingin keluar?'),
+            ]),
+            SizedBox(height: 24.h),
+            CustomButton(
+              text: 'Logout',
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Text('Logout'),
+                    content: Text('Apakah Anda yakin ingin keluar?'),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Batal'),
-                      ),
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text('Batal')),
                       TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Ya'),
-                      ),
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text('Ya')),
                     ],
-                  );
-                },
-              );
-
-              if (confirm == true) {
-                await authService.logout();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => LoginScreen()),
-                  (route) => false,
+                  ),
                 );
-              }
-            },
-            color: Colors.red,
-          ),
-
-          const SizedBox(height: 32),
-        ],
+                if (confirm == true) {
+                  await authService.logout();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => LoginScreen()),
+                    (route) => false,
+                  );
+                }
+              },
+              color: Colors.red,
+            ),
+            SizedBox(height: 24.h),
+          ],
+        ),
       ),
     );
   }
@@ -353,7 +247,10 @@ class ProfileScreen extends StatelessWidget {
                   item.icon,
                   color: Theme.of(context).primaryColor,
                 ),
-                title: Text(item.title),
+                title: Text(
+                  item.title,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
                 subtitle: item.subtitle != null ? Text(item.subtitle!) : null,
                 trailing: item.onTap != null
                     ? const Icon(

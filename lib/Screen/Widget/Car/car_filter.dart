@@ -45,7 +45,7 @@ class CarFilter extends StatelessWidget {
                 }
               },
               backgroundColor:
-                  Theme.of(context).colorScheme.onPrimary?.withOpacity(0.24),
+                  Theme.of(context).colorScheme.onPrimary.withOpacity(0.24),
               selectedColor: Theme.of(context).colorScheme.primary,
               labelStyle: TextStyle(
                 color: isSelected

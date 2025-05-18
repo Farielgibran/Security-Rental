@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:security_rental/Model/rental_model.dart';
-import 'package:security_rental/Screen/Widget/Car/car_card.dart';
-import 'package:security_rental/Screen/Widget/Car/car_filter.dart';
 import 'package:security_rental/Screen/Widget/Common/loading_widget.dart';
-import 'package:security_rental/Service/car_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:security_rental/Screen/Widget/Car/rental_card.dart';
 import 'package:security_rental/Service/rental_service.dart';
@@ -83,7 +80,7 @@ class _HomepageState extends State<Homepage> {
       return rentals
           .where((rental) => rental.status == RentalStatus.approved)
           .toList();
-    } else if (_selectedFilter == "Approved") {
+    } else if (_selectedFilter == "ongoing") {
       return rentals
           .where((rental) => rental.status == RentalStatus.onGoing)
           .toList();
@@ -114,6 +111,9 @@ class _HomepageState extends State<Homepage> {
         : Column(
             children: [
               // Statistics
+              SizedBox(
+                height: 48.h,
+              ),
               Container(
                 margin: const EdgeInsets.all(16),
                 padding: const EdgeInsets.all(16),
@@ -230,31 +230,34 @@ class _HomepageState extends State<Homepage> {
               // Rental List
               Expanded(
                 child: filteredRentals.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.history,
-                              size: 64,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Tidak ada riwayat Peminjaman',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                    ? RefreshIndicator(
+                        onRefresh: _loadRentals,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.history,
+                                size: 64,
+                                color: Colors.grey,
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Riwayat pinjam Anda akan muncul di sini',
-                              style: TextStyle(
-                                color: Colors.grey[600],
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Tidak ada riwayat Peminjaman',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Text(
+                                'Riwayat pinjam Anda akan muncul di sini',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       )
                     : RefreshIndicator(

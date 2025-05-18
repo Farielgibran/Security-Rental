@@ -20,15 +20,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => FaceVerificationService()),
         ChangeNotifierProvider(
           create: (_) => CarService(),
         ),
-        ChangeNotifierProvider(create: (_) => AuthService()),
-        ChangeNotifierProvider(create: (_) => FaceVerificationService()),
         ChangeNotifierProvider(create: (_) => RentalService()),
-        ChangeNotifierProvider(
-          create: (_) => CarService(),
-        )
       ],
       child: ScreenUtilInit(
         designSize: const Size(390, 844),

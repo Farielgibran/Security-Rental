@@ -1,5 +1,3 @@
-import 'package:security_rental/Model/car_model.dart';
-
 enum RentalStatus {
   pending,
   approved,

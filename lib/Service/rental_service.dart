@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:security_rental/Model/rental_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 
 class RentalService extends ChangeNotifier {
@@ -202,6 +200,68 @@ class RentalService extends ChangeNotifier {
       return true; // Untuk demo/development
     } finally {
       _setLoading(false);
+    }
+  }
+
+  Future<bool> verifikasiMobilKeluar({
+    required String rental,
+    required String token,
+  }) async {
+    final rentalId = rental; // rental sudah string
+    final url =
+        Uri.parse('${AppConfig.apiUrl}/transaksi/mobil-keluar/$rentalId');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({}), // body kosong sesuai permintaan
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint('Mobil keluar berhasil diverifikasi');
+        return true;
+      } else {
+        debugPrint('Gagal verifikasi mobil keluar: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error saat verifikasi mobil keluar: $e');
+      return false;
+    }
+  }
+
+  Future<bool> verifikasiMobilmasuk({
+    required String rental,
+    required String token,
+  }) async {
+    final rentalId = rental; // rental sudah string
+    final url =
+        Uri.parse('${AppConfig.apiUrl}/transaksi/mobil-masuk/$rentalId');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({}), // body kosong sesuai permintaan
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint('Mobil keluar berhasil diverifikasi');
+        return true;
+      } else {
+        debugPrint('Gagal verifikasi mobil keluar: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error saat verifikasi mobil keluar: $e');
+      return false;
     }
   }
 }

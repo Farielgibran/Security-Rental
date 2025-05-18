@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:security_rental/Config/app_config.dart';
 import 'package:security_rental/Screen/Auth/face-verification.dart';
 import 'package:security_rental/Screen/Home/Navbar/navbar.dart';
-import 'package:security_rental/Screen/Home/homepage.dart';
 import 'package:security_rental/Screen/Widget/Component/custom_button.dart';
 import 'package:security_rental/Screen/Widget/Component/custom_textfield.dart';
 import 'package:security_rental/Service/auth_service.dart';
@@ -20,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool _obscurePassword = true;
 
   @override
@@ -47,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success && mounted) {
       // Cek apakah verifikasi wajah diperlukan
       if (AppConfig.faceVerificationRequired &&
-          authService.currentUser!.faceId != null) {
+          authService.currentUser!.faceId == null) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => FaceVerificationScreen()),
         );
@@ -109,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: 48.h),
                   Text(
-                    'Email',
+                    'Username',
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
@@ -120,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _usernameController,
                     hintText: 'Masukkan Username Anda',
                     keyboardType: TextInputType.emailAddress,
-                    prefixIcon: Icons.email_outlined,
+                    prefixIcon: Icons.person,
                   ),
                   SizedBox(height: 24.h),
                   Text(
