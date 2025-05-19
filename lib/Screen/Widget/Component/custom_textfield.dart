@@ -64,13 +64,11 @@ class CustomTextField extends StatelessWidget {
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide:
-              BorderSide(color: Theme.of(context).colorScheme.onPrimary),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide:
-              BorderSide(color: Theme.of(context).colorScheme.onPrimary),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -81,9 +79,7 @@ class CustomTextField extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.red),
         ),
         filled: true,
-        fillColor: enabled
-            ? Theme.of(context).colorScheme.onPrimary
-            : Colors.grey[100],
+        fillColor: Colors.black.withOpacity(0.10),
       ),
     );
   }
