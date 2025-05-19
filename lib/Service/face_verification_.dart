@@ -36,27 +36,25 @@ class DeviceControlHelper {
 
 // Face verification service class
 class FaceVerificationService extends ChangeNotifier {
-  static const String _apiUrl = 'https://granvsa.my.id/facepy/register-face';
+  static const String _apiUrl =
+      'https://e1cb-35-227-113-117.ngrok-free.app/verify-face';
   bool _isProcessing = false;
 
   bool get isProcessing => _isProcessing;
 
-  // Convert Uint8List to File
   Future<File> _uint8ListToFile(Uint8List uint8list) async {
     final tempDir = await getTemporaryDirectory();
     final file = File(
-        '${tempDir.path}/face_image_${DateTime.now().millisecondsSinceEpoch}.jpg');
+        '${tempDir.path}/verify_face_${DateTime.now().millisecondsSinceEpoch}.jpg');
     await file.writeAsBytes(uint8list);
     return file;
   }
 
-  // Register face with API
-  Future<FaceVerificationResult> registerFace(Uint8List imageBytes) async {
+  Future<FaceVerificationResult> verifyFace(Uint8List imageBytes) async {
     _isProcessing = true;
     notifyListeners();
 
     try {
-      // Get user data from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final userJson = prefs.getString('user');
 
@@ -68,20 +66,11 @@ class FaceVerificationService extends ChangeNotifier {
       }
 
       final userData = json.decode(userJson);
-      final userId = userData['user_id'];
       final username = userData['username'];
 
-      // Convert image bytes to File
       final File imageFile = await _uint8ListToFile(imageBytes);
 
-      // Create multipart request
       var request = http.MultipartRequest('POST', Uri.parse(_apiUrl));
-
-      // Add text fields
-      request.fields['user_id'] = userId.toString();
-      request.fields['name'] = username;
-
-      // Add file
       var multipartFile = await http.MultipartFile.fromPath(
         'image',
         imageFile.path,
@@ -89,37 +78,47 @@ class FaceVerificationService extends ChangeNotifier {
       );
       request.files.add(multipartFile);
 
-      // Send request
       var response = await request.send();
       var responseData = await response.stream.bytesToString();
       var jsonResponse = json.decode(responseData);
 
-      if (response.statusCode == 200 && jsonResponse['success'] == true) {
-        // Update user data with face ID
-        final Map<String, dynamic> updatedUser = {...userData};
-        updatedUser['face_id'] = jsonResponse['user_id'];
-        updatedUser['face_registered_at'] = DateTime.now().toIso8601String();
-        updatedUser['verification_status'] = 'verified';
+      /// Debugging logs
+      print('Raw Response Data: $responseData');
+      print('Decoded JSON Response: $jsonResponse');
+      if (response.statusCode == 200) {
+        final bestMatch = jsonResponse['best_match'];
+        final similarity = jsonResponse['similarity'] ?? 0.0;
+        final successFlag = jsonResponse['success'] ?? false;
+        final message =
+            jsonResponse['message'] ?? 'Verification result received.';
 
-        // Save updated user data
-        await prefs.setString('user', json.encode(updatedUser));
+        print(
+            "Logged in user: $username, Best match: $bestMatch, Similarity: $similarity");
 
-        return FaceVerificationResult(
-          success: true,
-          message: 'Face verification successful',
-          faceId: jsonResponse['user_id'],
-        );
+        if (bestMatch != null &&
+            bestMatch.toString().toLowerCase() == username.toLowerCase()) {
+          return FaceVerificationResult(
+            success: true,
+            message: 'Verification success (username matched)!',
+            bestMatch: bestMatch,
+          );
+        } else {
+          return FaceVerificationResult(
+            success: false,
+            message: message,
+          );
+        }
       } else {
         return FaceVerificationResult(
           success: false,
-          message: jsonResponse['message'] ?? 'Face verification failed',
+          message: 'API Error: ${response.statusCode}',
         );
       }
     } catch (e) {
-      print('Face verification error: $e');
+      print('Verification error: $e');
       return FaceVerificationResult(
         success: false,
-        message: 'Error during face verification: $e',
+        message: 'Error during verification: $e',
       );
     } finally {
       _isProcessing = false;
@@ -128,15 +127,14 @@ class FaceVerificationService extends ChangeNotifier {
   }
 }
 
-// Result model class
 class FaceVerificationResult {
   final bool success;
   final String message;
-  final String? faceId;
+  final String? bestMatch;
 
   FaceVerificationResult({
     required this.success,
     required this.message,
-    this.faceId,
+    this.bestMatch,
   });
 }

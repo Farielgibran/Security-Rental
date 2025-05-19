@@ -5,6 +5,7 @@ import 'package:huawei_ml_body/huawei_ml_body.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:security_rental/Screen/Home/Navbar/navbar.dart';
+import 'package:security_rental/Screen/Home/homepage.dart';
 import 'package:security_rental/Screen/Widget/Common/loading_widget.dart';
 import 'package:security_rental/Screen/Widget/Component/custom_button.dart';
 import 'package:security_rental/Service/face_verification_.dart';
@@ -80,16 +81,17 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
     try {
       final faceService =
           Provider.of<FaceVerificationService>(context, listen: false);
-      final result = await faceService.registerFace(imageBytes);
+      final result = await faceService.verifyFace(imageBytes);
 
       if (result.success) {
         showToast("Face verification successful!");
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => MainNavbar()),
+          MaterialPageRoute(builder: (context) => Homepage()),
           (route) => false,
         );
       } else {
         showToast(result.message);
+        _redirectToRetry();
       }
     } catch (e) {
       print('Error during verification process: $e');
@@ -161,7 +163,7 @@ class VerificationFlowScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Face Verification'),
+        title: Text('Try Again Face Verification'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

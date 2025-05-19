@@ -16,7 +16,6 @@ class _MainNavbarState extends State<MainNavbar> {
 
   final List<Widget> _pages = [
     Homepage(),
-    Completed(),
     ProfileScreen(),
   ];
 
@@ -47,13 +46,6 @@ class _MainNavbarState extends State<MainNavbar> {
                     child: Icon(Icons.home, size: 32.h),
                   ),
                   label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: EdgeInsets.only(bottom: 4.h),
-                    child: Icon(Icons.history, size: 32.h),
-                  ),
-                  label: 'Completed',
                 ),
                 BottomNavigationBarItem(
                   icon: Padding(

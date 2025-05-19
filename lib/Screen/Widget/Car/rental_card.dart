@@ -4,6 +4,7 @@ import 'package:security_rental/Model/rental_model.dart';
 import 'package:security_rental/Screen/Widget/Common/custom_buttom.dart';
 import 'package:provider/provider.dart';
 import 'package:security_rental/Service/rental_service.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RentalCard extends StatelessWidget {
   final Rental rental;
@@ -206,10 +207,15 @@ class RentalCard extends StatelessWidget {
             ),
           ),
 
+          Padding(
+            padding: EdgeInsets.only(top: 12.h),
+            child: Text(rental.namaPenyewa,
+                style: Theme.of(context).textTheme.headlineMedium),
+          ),
           // Car Info
           if (rental.car != null)
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(6),
               child: Row(
                 children: [
                   Container(
