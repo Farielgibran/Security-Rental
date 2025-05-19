@@ -37,11 +37,10 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
       isProcessing = true;
     });
 
-    // Minta izin kamera dulu
     PermissionStatus status = await Permission.camera.request();
     if (!status.isGranted) {
       showToast("Camera permission is required for liveness detection");
-      Navigator.of(context).pop();
+      _redirectToRetry();
       return;
     }
 
@@ -49,33 +48,31 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
       MLLivenessCaptureResult result =
           await livenessCapture.startDetect(detectMask: false);
 
-      setState(() {
-        livenessResult =
-            result.isLive! ? "Liveness Detected" : "Liveness Not Detected";
-        capturedImage = result.bitmap;
-      });
-
-      print(livenessResult);
-      showToast(livenessResult);
-
-      if (result.isLive == null) {
+      if (result.isLive == null || result.isLive == false) {
         showToast("Liveness Not Detected");
-        Navigator.of(context).pop();
-      } else {
-        if (result.bitmap != null && result.isLive!) {
-          await _processVerification(result.bitmap!);
-        } else {
-          showToast("Please clean your camera and try again");
-          Navigator.of(context).pop();
-        }
+        _redirectToRetry();
+        return;
       }
+
+      if (result.bitmap == null) {
+        showToast("Please clean your camera and try again");
+        _redirectToRetry();
+        return;
+      }
+
+      // Jika lolos semua validasi
+      capturedImage = result.bitmap;
+      livenessResult = "Liveness Detected";
+
+      await _processVerification(result.bitmap!);
     } catch (e) {
+      print('Liveness Error: $e');
+      showToast("Error during liveness detection");
+      _redirectToRetry();
+    } finally {
       setState(() {
-        livenessResult = 'Error: ${e.toString()}';
         isProcessing = false;
       });
-      showToast("Error during liveness detection");
-      Navigator.of(context).pop();
     }
   }
 
@@ -93,17 +90,25 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
         );
       } else {
         showToast(result.message);
-        Navigator.of(context).pop();
       }
     } catch (e) {
       print('Error during verification process: $e');
       showToast("Verification process failed");
-      Navigator.of(context).pop();
+      _redirectToRetry();
     } finally {
       setState(() {
         isProcessing = false;
       });
     }
+  }
+
+  void _redirectToRetry() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => const VerificationFlowScreen(),
+      ),
+      (route) => false,
+    );
   }
 
   // Utility function to show toast messages
@@ -142,22 +147,7 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
                   ),
                 ],
               )
-            : capturedImage != null
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.memory(
-                        capturedImage!,
-                        height: 200,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        livenessResult,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  )
-                : LoadingWidget(),
+            : LoadingWidget(),
       ),
     );
   }

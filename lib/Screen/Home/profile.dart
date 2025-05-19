@@ -83,64 +83,64 @@ class ProfileScreen extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
                   ),
                   SizedBox(height: 8.h),
-                  user.faceId != null
-                      ? Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 12.w, vertical: 4.h),
-                          decoration: BoxDecoration(
-                            color: Colors.green[50],
-                            borderRadius: BorderRadius.circular(16.r),
-                            border: Border.all(color: Colors.green),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.verified_user,
-                                  size: 16.w, color: Colors.green),
-                              SizedBox(width: 4.w),
-                              Text(
-                                'Terverifikasi',
-                                style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13.sp),
-                              ),
-                            ],
-                          ),
-                        )
-                      : InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => FaceVerificationScreen()),
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12.w, vertical: 4.h),
-                            decoration: BoxDecoration(
-                              color: Colors.orange[50],
-                              borderRadius: BorderRadius.circular(16.r),
-                              border: Border.all(color: Colors.orange),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.warning,
-                                    size: 16.w, color: Colors.orange),
-                                SizedBox(width: 4.w),
-                                Text(
-                                  'Belum Diverifikasi',
-                                  style: TextStyle(
-                                      color: Colors.orange,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13.sp),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                  // user.faceId != null
+                  //     ? Container(
+                  //         padding: EdgeInsets.symmetric(
+                  //             horizontal: 12.w, vertical: 4.h),
+                  //         decoration: BoxDecoration(
+                  //           color: Colors.green[50],
+                  //           borderRadius: BorderRadius.circular(16.r),
+                  //           border: Border.all(color: Colors.green),
+                  //         ),
+                  //         child: Row(
+                  //           mainAxisSize: MainAxisSize.min,
+                  //           children: [
+                  //             Icon(Icons.verified_user,
+                  //                 size: 16.w, color: Colors.green),
+                  //             SizedBox(width: 4.w),
+                  //             Text(
+                  //               'Terverifikasi',
+                  //               style: TextStyle(
+                  //                   color: Colors.green,
+                  //                   fontWeight: FontWeight.bold,
+                  //                   fontSize: 13.sp),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       )
+                  //     : InkWell(
+                  //         onTap: () {
+                  //           Navigator.push(
+                  //             context,
+                  //             MaterialPageRoute(
+                  //                 builder: (_) => FaceVerificationScreen()),
+                  //           );
+                  //         },
+                  //         child: Container(
+                  //           padding: EdgeInsets.symmetric(
+                  //               horizontal: 12.w, vertical: 4.h),
+                  //           decoration: BoxDecoration(
+                  //             color: Colors.orange[50],
+                  //             borderRadius: BorderRadius.circular(16.r),
+                  //             border: Border.all(color: Colors.orange),
+                  //           ),
+                  //           child: Row(
+                  //             mainAxisSize: MainAxisSize.min,
+                  //             children: [
+                  //               Icon(Icons.warning,
+                  //                   size: 16.w, color: Colors.orange),
+                  //               SizedBox(width: 4.w),
+                  //               Text(
+                  //                 'Belum Diverifikasi',
+                  //                 style: TextStyle(
+                  //                     color: Colors.orange,
+                  //                     fontWeight: FontWeight.bold,
+                  //                     fontSize: 13.sp),
+                  //               ),
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       ),
                 ],
               ),
             ),
