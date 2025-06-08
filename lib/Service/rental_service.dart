@@ -152,265 +152,6 @@ class RentalService extends ChangeNotifier {
     }
   }
 
-  // Membatalkan rental
-  Future<bool> cancelRental(int rentalId, String token) async {
-    _setLoading(true);
-
-    try {
-      final response = await http.patch(
-        Uri.parse('${AppConfig.apiUrl}/transaksi/$rentalId/cancel'),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final updatedRental = Rental.fromJson(json.decode(response.body));
-        final index = _rentals.indexWhere((rental) => rental.id == rentalId);
-
-        if (index != -1) {
-          _rentals[index] = updatedRental;
-          notifyListeners();
-        }
-
-        return true;
-      } else {
-        print('Cancel rental failed: ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      print('Cancel rental error: $e');
-
-      // Update lokail status (untuk demo/development)
-      try {
-        final index = _rentals.indexWhere((rental) => rental.id == rentalId);
-        if (index != -1) {
-          // Kita tidak bisa mengubah langsung status karena rental immutable
-          // Jadi kita buat rental baru dengan status cancelled
-          Map<String, dynamic> rentalJson = _rentals[index].toJson();
-          rentalJson['status'] = 'cancelled';
-
-          _rentals[index] = Rental.fromJson(rentalJson);
-          notifyListeners();
-        }
-      } catch (e) {
-        print('Error updating local rental status: $e');
-      }
-
-      return true; // Untuk demo/development
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  /// Verifikasi mobil keluar - mengubah status dari approved ke onGoing
-  /// Endpoint: POST /pemeriksaan/verifikasi-keluar/{transaksi_id}
-  Future<Map<String, dynamic>> verifikasiMobilKeluar({
-    required String transaksiId,
-    required bool oli,
-    required bool tekananBan,
-    required bool toolSet,
-    required bool mesin,
-    String? catatan,
-    String? token,
-  }) async {
-    _setLoading(true);
-    _setError(null);
-
-    final url = Uri.parse(
-        '${AppConfig.apiUrl}/pemeriksaan/verifikasi-keluar/$transaksiId');
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'oli': oli,
-          'tekanan_ban': tekananBan,
-          'tool_set': toolSet,
-          'mesin': mesin,
-          'catatan': catatan,
-        }),
-      );
-
-      debugPrint('Response Status: ${response.statusCode}');
-      debugPrint('Response Body: ${response.body}');
-
-      if (response.statusCode == 201) {
-        final responseData = jsonDecode(response.body);
-
-        if (responseData['success'] == true) {
-          debugPrint('Verifikasi mobil keluar berhasil');
-
-          // Update local rental status jika ada
-          try {
-            final index = _rentals
-                .indexWhere((rental) => rental.id.toString() == transaksiId);
-            if (index != -1) {
-              Map<String, dynamic> rentalJson = _rentals[index].toJson();
-              rentalJson['status'] = oli && tekananBan && toolSet && mesin
-                  ? 'onGoing'
-                  : 'rejected';
-              _rentals[index] = Rental.fromJson(rentalJson);
-              notifyListeners();
-            }
-          } catch (e) {
-            debugPrint('Error updating local rental: $e');
-          }
-
-          return {
-            'success': true,
-            'message': responseData['message'],
-            'data': responseData['data'],
-          };
-        } else {
-          _setError(responseData['message']);
-          return {
-            'success': false,
-            'message': responseData['message'],
-          };
-        }
-      } else if (response.statusCode == 422) {
-        final errorData = jsonDecode(response.body);
-        _setError('Validation error: ${errorData['errors']}');
-        return {
-          'success': false,
-          'message': 'Validation error',
-          'errors': errorData['errors'],
-        };
-      } else if (response.statusCode == 404) {
-        final errorData = jsonDecode(response.body);
-        _setError(errorData['message']);
-        return {
-          'success': false,
-          'message': errorData['message'],
-        };
-      } else {
-        final errorData = jsonDecode(response.body);
-        _setError('Gagal verifikasi mobil keluar: ${errorData['message']}');
-        return {
-          'success': false,
-          'message': errorData['message'],
-        };
-      }
-    } catch (e) {
-      debugPrint('Error saat verifikasi mobil keluar: $e');
-      _setError('Error saat verifikasi mobil keluar: $e');
-      return {
-        'success': false,
-        'message': 'Error saat verifikasi mobil keluar: $e',
-      };
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  /// Verifikasi mobil masuk - mengubah status dari onGoing ke completed
-  /// Endpoint: POST /pemeriksaan/verifikasi-masuk/{transaksi_id}
-  Future<Map<String, dynamic>> verifikasiMobilMasuk({
-    required String transaksiId,
-    required bool oli,
-    required bool tekananBan,
-    required bool toolSet,
-    required bool mesin,
-    String? catatan,
-    String? token,
-  }) async {
-    _setLoading(true);
-    _setError(null);
-
-    final url = Uri.parse(
-        '${AppConfig.apiUrl}/pemeriksaan/verifikasi-masuk/$transaksiId');
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'oli': oli,
-          'tekanan_ban': tekananBan,
-          'tool_set': toolSet,
-          'mesin': mesin,
-          'catatan': catatan,
-        }),
-      );
-
-      debugPrint('Response Status: ${response.statusCode}');
-      debugPrint('Response Body: ${response.body}');
-
-      if (response.statusCode == 201) {
-        final responseData = jsonDecode(response.body);
-
-        if (responseData['success'] == true) {
-          debugPrint('Verifikasi mobil masuk berhasil');
-
-          // Update local rental status jika ada
-          try {
-            final index = _rentals
-                .indexWhere((rental) => rental.id.toString() == transaksiId);
-            if (index != -1) {
-              Map<String, dynamic> rentalJson = _rentals[index].toJson();
-              rentalJson['status'] = 'completed';
-              _rentals[index] = Rental.fromJson(rentalJson);
-              notifyListeners();
-            }
-          } catch (e) {
-            debugPrint('Error updating local rental: $e');
-          }
-
-          return {
-            'success': true,
-            'message': responseData['message'],
-            'data': responseData['data'],
-          };
-        } else {
-          _setError(responseData['message']);
-          return {
-            'success': false,
-            'message': responseData['message'],
-          };
-        }
-      } else if (response.statusCode == 422) {
-        final errorData = jsonDecode(response.body);
-        _setError('Validation error: ${errorData['errors']}');
-        return {
-          'success': false,
-          'message': 'Validation error',
-          'errors': errorData['errors'],
-        };
-      } else if (response.statusCode == 404) {
-        final errorData = jsonDecode(response.body);
-        _setError(errorData['message']);
-        return {
-          'success': false,
-          'message': errorData['message'],
-        };
-      } else {
-        final errorData = jsonDecode(response.body);
-        _setError('Gagal verifikasi mobil masuk: ${errorData['message']}');
-        return {
-          'success': false,
-          'message': errorData['message'],
-        };
-      }
-    } catch (e) {
-      debugPrint('Error saat verifikasi mobil masuk: $e');
-      _setError('Error saat verifikasi mobil masuk: $e');
-      return {
-        'success': false,
-        'message': 'Error saat verifikasi mobil masuk: $e',
-      };
-    } finally {
-      _setLoading(false);
-    }
-  }
-
   /// Method helper untuk mendapatkan rentals berdasarkan status tertentu
   List<Rental> getRentalsByStatus(RentalStatus status) {
     return _rentals.where((rental) => rental.status == status).toList();
@@ -420,4 +161,212 @@ class RentalService extends ChangeNotifier {
   Future<void> refreshRentals(String userid) async {
     await fetchRentals(userid);
   }
+
+  // ========== VERIFIKASI MOBIL KELUAR ==========
+  /// Verifikasi mobil keluar (approved -> onGoing)
+  Future<Map<String, dynamic>> verifyCarOut({
+    required int transaksiId,
+    required String kilometerKeluar,
+    required String bensinKeluar,
+    required String kondisiFisikKeluar,
+  }) async {
+    _setLoading(true);
+    _setError(null);
+
+    final url = Uri.parse('${AppConfig.apiUrl}/verifikasi-keluar/$transaksiId');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({
+          'kilometer_keluar': kilometerKeluar,
+          'bensin_keluar': bensinKeluar,
+          'kondisi_fisik_keluar': kondisiFisikKeluar,
+        }),
+      );
+
+      final responseData = json.decode(response.body);
+      print('Verify car out response: $responseData');
+
+      if (response.statusCode == 200) {
+        // Refresh data setelah verifikasi berhasil
+        await refreshRentals(''); // Refresh data terbaru
+
+        return {
+          'success': true,
+          'message':
+              responseData['message'] ?? 'Verifikasi mobil keluar berhasil',
+          'data': responseData['data'],
+        };
+      } else {
+        final errorMessage = responseData['message'] ??
+            'Gagal melakukan verifikasi mobil keluar';
+        _setError(errorMessage);
+
+        return {
+          'success': false,
+          'message': errorMessage,
+          'errors': responseData['errors'],
+        };
+      }
+    } catch (e) {
+      final errorMessage = 'Error saat koneksi ke server: $e';
+      _setError(errorMessage);
+      print('Verify car out error: $e');
+
+      return {
+        'success': false,
+        'message': errorMessage,
+      };
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // ========== VERIFIKASI MOBIL MASUK ==========
+  /// Verifikasi mobil masuk (onGoing -> completed)
+  Future<Map<String, dynamic>> verifyCarIn({
+    required int transaksiId,
+    required String kilometerMasuk,
+    required String bensinMasuk,
+    required String kondisiFisikMasuk,
+    DateTime? tanggalKembali,
+  }) async {
+    _setLoading(true);
+    _setError(null);
+
+    final url = Uri.parse('${AppConfig.apiUrl}/verifikasi-masuk/$transaksiId');
+
+    try {
+      final requestBody = {
+        'kilometer_masuk': kilometerMasuk,
+        'bensin_masuk': bensinMasuk,
+        'kondisi_fisik_masuk': kondisiFisikMasuk,
+      };
+
+      // Tambahkan tanggal kembali jika ada
+      if (tanggalKembali != null) {
+        requestBody['tanggal_kembali'] = tanggalKembali.toIso8601String();
+      }
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode(requestBody),
+      );
+
+      final responseData = json.decode(response.body);
+      print('Verify car in response: $responseData');
+
+      if (response.statusCode == 200) {
+        // Refresh data setelah verifikasi berhasil
+        await refreshRentals(''); // Refresh data terbaru
+
+        return {
+          'success': true,
+          'message':
+              responseData['message'] ?? 'Verifikasi mobil masuk berhasil',
+          'data': responseData['data'],
+        };
+      } else {
+        final errorMessage =
+            responseData['message'] ?? 'Gagal melakukan verifikasi mobil masuk';
+        _setError(errorMessage);
+
+        return {
+          'success': false,
+          'message': errorMessage,
+          'errors': responseData['errors'],
+        };
+      }
+    } catch (e) {
+      final errorMessage = 'Error saat koneksi ke server: $e';
+      _setError(errorMessage);
+      print('Verify car in error: $e');
+
+      return {
+        'success': false,
+        'message': errorMessage,
+      };
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // ========== GET TRANSACTION DETAIL FOR VERIFICATION ==========
+  /// Mendapatkan detail transaksi untuk verifikasi
+  Future<Map<String, dynamic>> getTransactionDetail(int transaksiId) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+            '${AppConfig.apiUrl}/car-verification/transaction/$transaksiId'),
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
+
+      final responseData = json.decode(response.body);
+      print('Get transaction detail response: $responseData');
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message':
+              responseData['message'] ?? 'Detail transaksi berhasil diambil',
+          'data': responseData['data'],
+        };
+      } else {
+        final errorMessage =
+            responseData['message'] ?? 'Gagal mengambil detail transaksi';
+        _setError(errorMessage);
+
+        return {
+          'success': false,
+          'message': errorMessage,
+        };
+      }
+    } catch (e) {
+      final errorMessage = 'Error saat koneksi ke server: $e';
+      _setError(errorMessage);
+      print('Get transaction detail error: $e');
+
+      return {
+        'success': false,
+        'message': errorMessage,
+      };
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // ========== HELPER METHODS ==========
+  /// Cek apakah transaksi bisa diverifikasi keluar
+  bool canVerifyOut(Rental rental) {
+    return rental.status == RentalStatus.approved &&
+        rental.statusMobilKeluar == false;
+  }
+
+  /// Cek apakah transaksi bisa diverifikasi masuk
+  bool canVerifyIn(Rental rental) {
+    return rental.status == RentalStatus.onGoing &&
+        rental.statusMobilMasuk == false;
+  }
+
+  /// Get rentals yang siap untuk verifikasi keluar
+  List<Rental> get rentalsReadyForOut =>
+      _rentals.where((rental) => canVerifyOut(rental)).toList();
+
+  /// Get rentals yang siap untuk verifikasi masuk
+  List<Rental> get rentalsReadyForIn =>
+      _rentals.where((rental) => canVerifyIn(rental)).toList();
 }

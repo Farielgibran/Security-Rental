@@ -253,6 +253,7 @@ class _HomepageState extends State<Homepage> {
                               Text(
                                 'Riwayat pinjam Anda akan muncul di sini',
                                 style: TextStyle(
+                                  fontSize: 18,
                                   color: Colors.grey[600],
                                 ),
                               ),
