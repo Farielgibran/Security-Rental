@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:security_rental/Screen/Auth/face-verification.dart';
 import 'package:security_rental/Screen/Auth/login-screen.dart';
 import 'package:security_rental/Screen/Widget/Common/custom_buttom.dart';
 import 'package:security_rental/Screen/Widget/Common/loading_widget.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:security_rental/Screen/Home/completed.dart';
 import 'package:security_rental/Screen/Home/homepage.dart';
 import 'package:security_rental/Screen/Home/profile.dart';
 

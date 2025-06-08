@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:security_rental/Model/rental_model.dart';
+import 'package:security_rental/Screen/Pemeriksaan/pemerriksaan_kendaraan.dart';
 import 'package:security_rental/Screen/Widget/Common/custom_buttom.dart';
+// Import screen pemeriksaan
 import 'package:provider/provider.dart';
 import 'package:security_rental/Service/rental_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -59,99 +61,42 @@ class RentalCard extends StatelessWidget {
     }
   }
 
-  // Batalkan rental
-  Future<void> verifikasikeluar(BuildContext context) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('confirmasi mobil keluar'),
-          content: const Text('Apakah Anda yakin ingin keluar verifikasi ini?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Tidak'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Ya'),
-            ),
-          ],
-        );
-      },
-    );
+  // Navigation method untuk pemeriksaan
+  void _navigateToPemeriksaan(BuildContext context) {
+    String tipePemeriksaan;
+    String buttonText;
+    IconData buttonIcon;
+    Color buttonColor;
 
-    if (confirm == true) {
-      final rentalService = Provider.of<RentalService>(context, listen: false);
-      final success = await rentalService.verifikasiMobilKeluar(
-        rental: rental.id.toString(),
-        token: 'your-token',
-      );
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('mobil terverifikasi keluar'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gagal verifikasi keluar'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    // Tentukan tipe pemeriksaan berdasarkan status
+    if (rental.status == RentalStatus.approved) {
+      tipePemeriksaan = "keluar";
+      buttonText = "Verifikasi Mobil Keluar";
+      buttonIcon = Icons.exit_to_app;
+      buttonColor = Colors.orange;
+    } else if (rental.status == RentalStatus.onGoing) {
+      tipePemeriksaan = "masuk";
+      buttonText = "Verifikasi Mobil Masuk";
+      buttonIcon = Icons.assignment_return;
+      buttonColor = Colors.green;
+    } else {
+      return; // Tidak ada aksi untuk status lain
     }
-  }
 
-  // Batalkan rental
-  Future<void> verifikasimasuk(BuildContext context) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('confirmasi mobil masuk'),
-          content:
-              const Text('Apakah Anda yakin ingin masuk mobil verifikasi ini?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Tidak'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Ya'),
-            ),
-          ],
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PemeriksaanKendaraanScreen(
+          transaksiId: rental.id.toString(),
+          tipePemeriksaan: tipePemeriksaan,
+          namaPenyewa: rental.namaPenyewa,
+          merkMobil: rental.car != null
+              ? '${rental.car!.merk} ${rental.car!.model}'
+              : 'Mobil tidak diketahui',
+          platMobil: rental.car?.plat ?? 'Plat tidak diketahui',
+        ),
+      ),
     );
-
-    if (confirm == true) {
-      final rentalService = Provider.of<RentalService>(context, listen: false);
-      final success = await rentalService.verifikasiMobilmasuk(
-        rental: rental.id.toString(),
-        token: 'your-token',
-      );
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('mobil terverifikasi masuk kembali'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gagal verifikasi mobil masuk kembali'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   @override
@@ -304,7 +249,7 @@ class RentalCard extends StatelessWidget {
             ),
           ),
 
-          // Actions
+          // Actions untuk status approved (mobil keluar)
           if (rental.status == RentalStatus.approved)
             Padding(
               padding: const EdgeInsets.all(12),
@@ -313,17 +258,17 @@ class RentalCard extends StatelessWidget {
                   Expanded(
                     child: CustomButton(
                       text: 'Verifikasi Mobil Keluar',
-                      onPressed: () => verifikasikeluar(context),
-                      color: Colors.red,
+                      onPressed: () => _navigateToPemeriksaan(context),
+                      color: Colors.orange,
                       height: 36,
-                      icon: Icons.door_back_door,
+                      icon: Icons.exit_to_app,
                     ),
                   ),
                 ],
               ),
             ),
 
-          // Actions
+          // Actions untuk status onGoing (mobil masuk)
           if (rental.status == RentalStatus.onGoing)
             Padding(
               padding: const EdgeInsets.all(12),
@@ -331,11 +276,11 @@ class RentalCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: CustomButton(
-                      text: 'Verifikasi Mobil kembali masuk',
-                      onPressed: () => verifikasimasuk(context),
+                      text: 'Verifikasi Mobil Masuk',
+                      onPressed: () => _navigateToPemeriksaan(context),
                       color: Colors.green,
                       height: 36,
-                      icon: Icons.cancel,
+                      icon: Icons.assignment_return,
                     ),
                   ),
                 ],

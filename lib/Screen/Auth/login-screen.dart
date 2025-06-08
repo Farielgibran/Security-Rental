@@ -44,18 +44,21 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (success && mounted) {
-      // Cek apakah verifikasi wajah diperlukan
-      if (AppConfig.faceVerificationRequired &&
-          authService.currentUser!.faceId == null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => FaceVerificationScreen()),
-        );
-      } else {
-        // Jika tidak perlu verifikasi wajah, langsung ke HomeScreen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => MainNavbar()),
-        );
-      }
+      // // Cek apakah verifikasi wajah diperlukan
+      // if (AppConfig.faceVerificationRequired &&
+      //     authService.currentUser!.faceId == null) {
+      //   Navigator.of(context).pushReplacement(
+      //     MaterialPageRoute(builder: (_) => FaceVerificationScreen()),
+      //   );
+      // } else {
+      //   // Jika tidak perlu verifikasi wajah, langsung ke HomeScreen
+      //   Navigator.of(context).pushReplacement(
+      //     MaterialPageRoute(builder: (_) => MainNavbar()),
+      //   );
+      // }
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => MainNavbar()),
+      );
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

@@ -122,7 +122,7 @@ class Rental {
       verifikasiWajahKeluarConfidence:
           json['verifikasi_wajah_keluar_confidence'],
       verifikasiWajahKeterangan: json['verifikasi_wajah_keterangan'],
-      status: determineStatus(json['status']),
+      status: determineStatus(json['status_peminjaman']),
       createdAt: DateTime.parse(json['created_at']),
       car: json['mobil'] != null ? Car.fromJson(json['mobil']) : null,
     );
@@ -170,7 +170,7 @@ class Rental {
       'verifikasi_wajah_keluar_foto': verifikasiWajahKeluarFoto,
       'verifikasi_wajah_keluar_confidence': verifikasiWajahKeluarConfidence,
       'verifikasi_wajah_keterangan': verifikasiWajahKeterangan,
-      'status': statusToString(status),
+      'status_peminjaman': statusToString(status),
       'created_at': createdAt.toIso8601String(),
       'mobil': car?.toJson(),
     };
