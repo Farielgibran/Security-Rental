@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   CustomTextField(
                     controller: _passwordController,
                     hintText: 'Masukkan password Anda',
-                    obscureText: !_obscurePassword,
+                    obscureText: _obscurePassword,
                     prefixIcon: Icons.lock_outline,
                     suffixIcon: IconButton(
                       icon: Icon(
