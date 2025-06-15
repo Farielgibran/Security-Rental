@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:security_rental/Screen/Auth/face-verification.dart';
 import 'package:security_rental/Screen/Auth/login-screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:security_rental/Screen/Home/splash_screen.dart';
 import 'package:security_rental/Screen/Utils/Theme/theme.dart';
 import 'package:security_rental/Service/auth_service.dart';
 import 'package:security_rental/Service/car_service.dart';
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
             title: 'Security rental App',
             debugShowCheckedModeBanner: false,
             theme: Lightmode,
-            home: LoginScreen(),
+            home: SplashScreen(),
             routes: {
               '/login': (context) => LoginScreen(),
               '/faceVerification': (context) => FaceVerificationScreen()

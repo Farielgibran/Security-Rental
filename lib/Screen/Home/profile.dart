@@ -159,7 +159,7 @@ class ProfileScreen extends StatelessWidget {
                           size: 40.w, color: Theme.of(context).primaryColor),
                       children: [
                         Text(
-                          'Aplikasi peminjaman mobil dengan verifikasi wajah.',
+                          'Aplikasi Security peminjaman mobil .',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ],

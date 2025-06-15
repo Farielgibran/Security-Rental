@@ -9,10 +9,12 @@ class AuthService extends ChangeNotifier {
   User? _currentUser;
   bool _isLoading = false;
   String? _token;
+  bool _isInitialized = false;
 
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
-  bool get isLoggedIn => _currentUser != null;
+  bool get isLoggedIn => _currentUser != null && _token != null;
+  bool get isInitialized => _isInitialized;
 
   // Konstruktor untuk memuat data pengguna dari local storage
   AuthService() {
@@ -31,11 +33,28 @@ class AuthService extends ChangeNotifier {
       if (userJson != null && token != null) {
         _currentUser = User.fromJson(json.decode(userJson));
         _token = token;
+        print('Auto-login successful');
       }
     } catch (e) {
       print('Error loading user: $e');
+      await _clearUserData();
     } finally {
+      _isInitialized = true;
       setLoading(false);
+    }
+  }
+
+  // Membersihkan data user dari local storage
+  Future<void> _clearUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('user');
+      await prefs.remove('token');
+      _currentUser = null;
+      _token = null;
+      notifyListeners();
+    } catch (e) {
+      print('Error clearing user data: $e');
     }
   }
 
@@ -47,6 +66,7 @@ class AuthService extends ChangeNotifier {
       if (_currentUser != null && _token != null) {
         await prefs.setString('user', json.encode(_currentUser!.toJson()));
         await prefs.setString('token', _token!);
+        print('User data saved successfully');
       }
     } catch (e) {
       print('Error saving user: $e');
@@ -59,70 +79,45 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // // Registrasi pengguna baru
-  // Future<bool> register({
-  //   required String name,
-  //   required String email,
-  //   required String password,
-  //   required String phone,
-  // }) async {
-  //   setLoading(true);
-
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse('${AppConfig.apiUrl}/auth/register'),
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: json.encode({
-  //         'name': name,
-  //         'email': email,
-  //         'password': password,
-  //         'phone': phone,
-  //       }),
-  //     );
-
-  //     if (response.statusCode == 201) {
-  //       final data = json.decode(response.body);
-  //       _currentUser = User.fromJson(data['user']);
-  //       _token = data['token'];
-
-  //       await _saveUser();
-  //       return true;
-  //     } else {
-  //       print('Registration failed: ${response.body}');
-  //       return false;
-  //     }
-  //   } catch (e) {
-  //     print('Registration error: $e');
-  //     return false;
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
-
   // Login pengguna
-  Future<bool> login(
-      {required String username, required String password}) async {
+  Future<bool> login({
+    required String username,
+    required String password,
+  }) async {
     setLoading(true);
 
     try {
-      final response = await http.post(
-        Uri.parse('${AppConfig.apiUrl}/login-alt'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'username': username,
-          'password': password,
-        }),
-      );
-      print(response.body);
+      final response = await http
+          .post(
+            Uri.parse('${AppConfig.apiUrl}/login-alt'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'username': username,
+              'password': password,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      print('Login response status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        _currentUser = User.fromJson(data['user']);
-        _token = data['token'];
 
-        await _saveUser();
-        return true;
+        if (data['user'] != null && data['token'] != null) {
+          _currentUser = User.fromJson(data['user']);
+          _token = data['token'];
+
+          await _saveUser();
+
+          print('Login successful for user: ${_currentUser?.username}');
+          return true;
+        } else {
+          print('Login failed: Invalid response format');
+          return false;
+        }
       } else {
-        print('Login failed: ${response.body}');
+        print(
+            'Login failed with status ${response.statusCode}: ${response.body}');
         return false;
       }
     } catch (e) {
@@ -138,17 +133,39 @@ class AuthService extends ChangeNotifier {
     setLoading(true);
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('user');
-      await prefs.remove('token');
+      // Beritahu server bahwa user logout (opsional)
+      if (_token != null) {
+        try {
+          await http.post(
+            Uri.parse('${AppConfig.apiUrl}/logout'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_token',
+            },
+          ).timeout(const Duration(seconds: 10));
+        } catch (e) {
+          print('Server logout notification failed: $e');
+          // Continue with local logout even if server notification fails
+        }
+      }
 
-      _currentUser = null;
-      _token = null;
+      await _clearUserData();
+      print('Logout completed successfully');
     } catch (e) {
       print('Logout error: $e');
+      // Tetap clear data meskipun ada error
+      await _clearUserData();
     } finally {
       setLoading(false);
     }
+  }
+
+  // Force logout (without server notification)
+  Future<void> forceLogout() async {
+    setLoading(true);
+    await _clearUserData();
+    setLoading(false);
+    print('Force logout completed');
   }
 
   // Update profile pengguna
@@ -163,19 +180,21 @@ class AuthService extends ChangeNotifier {
     setLoading(true);
 
     try {
-      final response = await http.patch(
-        Uri.parse('${AppConfig.apiUrl}/users/profile'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_token',
-        },
-        body: json.encode({
-          'name': name,
-          'phone': phone,
-          'idCardNumber': idCardNumber,
-          'drivingLicense': drivingLicense,
-        }),
-      );
+      final response = await http
+          .patch(
+            Uri.parse('${AppConfig.apiUrl}/users/profile'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_token',
+            },
+            body: json.encode({
+              'name': name,
+              'phone': phone,
+              'idCardNumber': idCardNumber,
+              'drivingLicense': drivingLicense,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -194,4 +213,20 @@ class AuthService extends ChangeNotifier {
       setLoading(false);
     }
   }
+
+  // Get authorization header
+  Map<String, String> getAuthHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${_token ?? ''}',
+    };
+  }
+
+  // Check if user has specific role
+  bool hasRole(String role) {
+    return _currentUser?.lvlUsers == role;
+  }
+
+  // Get token
+  String? get token => _token;
 }
