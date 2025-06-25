@@ -144,8 +144,8 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             _buildSection(context, title: 'Lainnya', items: [
-              ProfileMenuItem(
-                  icon: Icons.help_outline, title: 'Bantuan', onTap: () {}),
+              // ProfileMenuItem(
+              //     icon: Icons.help_outline, title: 'Bantuan', onTap: () {}),
               ProfileMenuItem(
                 icon: Icons.info_outline,
                 title: 'Tentang Aplikasi',
@@ -248,7 +248,10 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 title: Text(
                   item.title,
-                  style: Theme.of(context).textTheme.labelMedium,
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelMedium
+                      ?.copyWith(color: Theme.of(context).primaryColor),
                 ),
                 subtitle: item.subtitle != null ? Text(item.subtitle!) : null,
                 trailing: item.onTap != null
